@@ -4,7 +4,9 @@
   (global = global || self, factory(global.BasicRenderer = {}));
 }(this, (function (exports) { 'use strict';
   
-  const rastPolygon = () => {
+
+  // usar earclipping pra triangularizar graficos
+  const rastComplexPolygon = () => {
     return false;
   }
 
@@ -33,13 +35,13 @@
   }
 
   const buildVectors = (vertices) => {
+    if(vertices.length === 2) {
+      return [vertices[0][0] - vertices[1][0], vertices[0][1] - vertices[1][1]];
+    }
+    
     const vectors = [];
   
     for (let i = 0; i < vertices.length; i++){
-      if(vertices.length === 2) {
-        return [vertices[0][0] - vertices[1][0], vertices[0][1] - vertices[1][1]];
-      }
-
       if(i+1 === vertices.length){
         vectors.push([vertices[0][0] - vertices[i][0], vertices[0][1] - vertices[i][1]]);
       } else {
@@ -52,7 +54,7 @@
 
   const innerProduct = (v1, v2) => (v1[0] * v2[0]) + (v1[1] * v2[1]);
 
-  const rastTriangle = (x, y, primitive) => {
+  const rastSimplePolygon = (x, y, primitive) => {
     const {vectors, vertices} = primitive;
 
     for(let i = 0; i < vertices.length; i++){
@@ -70,9 +72,9 @@
       case 'circle':
         return rastCircle(x, y, primitive.radius, primitive.center);
       case 'polygon':
-        return rastPolygon();
+        return rastSimplePolygon(x, y, primitive);
       default:
-        return rastTriangle(x, y, primitive);
+        return rastSimplePolygon(x, y, primitive);
     }
   }
       
