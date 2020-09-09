@@ -18,16 +18,14 @@
   }
 
   // parametrica serve para gerar pontos x1 = r * cos(teta) + h | x2 = r * sen(teta) + k
+  // gerando vértices para transformar o círculo em triângulos.
   const parametrica = (raio, pontos = 10) => {
     const vertices = [];
     const twoPi = Math.PI * 2;
 
     for(let i = 0; i <= pontos; i++){
-      const x1 = raio * Math.cos(((twoPi * i) / pontos));
-      const x2 = raio * Math.sin(((twoPi * i) / pontos))
-
-      console.log((twoPi * i) / pontos);
-      console.log(`x1 = ${x1}, x2 = ${x2}`);
+      const x1 = Math.round(raio * Math.cos(((twoPi * i) / pontos)));
+      const x2 = Math.round(raio * Math.sin(((twoPi * i) / pontos)))
 
       vertices.push([x1, x2])
     }
@@ -35,20 +33,21 @@
     return vertices;
   }
   
-  const circleToTriangles = (primitive) => {
+  // transforma o círculo em triângulos
+  const circleToTriangles = (primitive, pontos = 10) => {
     const triangles = [];
 
     const { center } = primitive;
-    const vertices = parametrica(primitive.radius);
+    const vertices = parametrica(primitive.radius, pontos);
   
     for(let i = 0; i < vertices.length-1; i++){
       triangles.push({  
         shape: "triangle",
-        vertices: nj.array([ 
+        vertices: [ 
           [ center[0], center[1] ],
-          [ vertices[i][0], vertices[i][1] ],
-          [ vertices[i+1][0], vertices[i+1][1] ]
-        ]),
+          [ center[0] + vertices[i][0],  center[1] + vertices[i][1] ],
+          [ center[0] + vertices[i+1][0], center[1] + vertices[i+1][1] ]
+        ],
         color: primitive.color    
       })
     }
@@ -147,7 +146,9 @@
 
   const limits = (primitive) => {
     if (primitive.shape === 'circle') {
-      primitive.center = primitive.center.selection.data;
+      if (primitive.center.selection) {
+        primitive.center = primitive.center.selection.data;
+      }
 
       return { 
         x: {
@@ -161,7 +162,10 @@
       };
     }
 
-    primitive.vertices = parseVertices(primitive.vertices.selection.data);
+    if(primitive.vertices.selection) {
+      primitive.vertices = parseVertices(primitive.vertices.selection.data);
+    }
+
     primitive.vectors = buildVectors(primitive.vertices);        
     return boundingBox(primitive.vertices);
   }
@@ -176,13 +180,25 @@
   Object.assign( Screen.prototype, {
 
     preprocess: function(scene) {
-      // for (var primitive of scene){
-      //   if(primitive.shape === 'circle'){
-      //     primitive.center = primitive.center.selection.data;
-      //     console.log('scene =', scene)
-      //     console.log(circleToTriangles(primitive));
-      //   }
-      // }
+      const newScene = [];
+
+      for (let i = 0; i < scene.length; i++){
+        let primitive = scene[i];
+
+        if(primitive.shape === 'circle'){
+          primitive.center = primitive.center.selection.data;
+
+          // usando 10 pontos na função que transforma para triangulo para ficar mais evidente a transformação
+          const triangles = circleToTriangles(primitive, 10);
+          newScene.push(...triangles);
+        } else {
+          newScene.push(scene[i]);
+        }
+
+      }
+
+      // Descomentar a linha abaixo para usar os círculos transformatos em triangulos
+      // scene = newScene;
 
       var preprop_scene = [];
 
