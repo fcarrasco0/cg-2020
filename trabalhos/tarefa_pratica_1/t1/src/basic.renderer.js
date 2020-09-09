@@ -3,7 +3,14 @@
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = global || self, factory(global.BasicRenderer = {}));
 }(this, (function (exports) { 'use strict';
-  
+
+  // usando arrow functions para os métodos auxiliares, abaixo exemplo de uma
+  const helloWorld = () => 'Hello World!';
+
+  // seria análogo à escrever da maneira
+  function helloWorld2 () {
+    return 'Hello World';
+  }
 
   // usar earclipping pra triangularizar graficos
   const rastComplexPolygon = () => {
@@ -11,16 +18,53 @@
   }
 
   // parametrica serve para gerar pontos x1 = r * cos(teta) + h | x2 = r * sen(teta) + k
+  const parametrica = (raio, pontos = 10) => {
+    const vertices = [];
+    const twoPi = Math.PI * 2;
+
+    for(let i = 0; i <= pontos; i++){
+      const x1 = raio * Math.cos(((twoPi * i) / pontos));
+      const x2 = raio * Math.sin(((twoPi * i) / pontos))
+
+      console.log((twoPi * i) / pontos);
+      console.log(`x1 = ${x1}, x2 = ${x2}`);
+
+      vertices.push([x1, x2])
+    }
+
+    return vertices;
+  }
+  
+  const circleToTriangles = (primitive) => {
+    const triangles = [];
+
+    const { center } = primitive;
+    const vertices = parametrica(primitive.radius);
+  
+    for(let i = 0; i < vertices.length-1; i++){
+      triangles.push({  
+        shape: "triangle",
+        vertices: nj.array([ 
+          [ center[0], center[1] ],
+          [ vertices[i][0], vertices[i][1] ],
+          [ vertices[i+1][0], vertices[i+1][1] ]
+        ]),
+        color: primitive.color    
+      })
+    }
+    
+    return triangles;
+  }
+
   // equação implicíta da reta:
-  // (x1 - h)^2 + (x2 - k)^2 = r^2 se p está na borda
-  //                         < r^2 se está no interior
-  //                         > r^2 se está no exterior
+  // (x1 - h)^2 + (x2 - k)^2 = r^2 se p está na borda || < r^2 no interior || > r^2 no exterior
 
   const rastCircle = (x, y, r, center) => {
     const k = center[0];
     const h = center[1];
+    const result = (x - k)**2 + (y - h)**2 ;
 
-    if((x - h)**2 + (y - k)**2 > r**2) return false;
+    if(result > r**2) return false;
     return true
   }
 
@@ -102,7 +146,7 @@
   }
 
   const limits = (primitive) => {
-    if(primitive.shape === 'circle') {
+    if (primitive.shape === 'circle') {
       primitive.center = primitive.center.selection.data;
 
       return { 
@@ -132,8 +176,13 @@
   Object.assign( Screen.prototype, {
 
     preprocess: function(scene) {
-      // Possible preprocessing with scene primitives, for now we don't change anything
-      // You may define bounding boxes, convert shapes, etc
+      // for (var primitive of scene){
+      //   if(primitive.shape === 'circle'){
+      //     primitive.center = primitive.center.selection.data;
+      //     console.log('scene =', scene)
+      //     console.log(circleToTriangles(primitive));
+      //   }
+      // }
 
       var preprop_scene = [];
 
@@ -154,6 +203,7 @@
 
       // In this loop, the image attribute must be updated after the rasterization procedure.
       for( var primitive of this.scene ) {
+        // usando o bounding box como limites para os loops
         const limits = primitive.boundingBox;
 
         for (var i = limits.x.start; i < limits.x.end; i++) {
