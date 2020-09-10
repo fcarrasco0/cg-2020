@@ -4,6 +4,8 @@
   (global = global || self, factory(global.BasicRenderer = {}));
 }(this, (function (exports) { 'use strict';
 
+  // ======  pequena observação sobre alguns padrões usados ======
+
   // usando arrow functions para os métodos auxiliares, abaixo exemplo de uma
   const helloWorld = () => 'Hello World!';
 
@@ -12,20 +14,27 @@
     return 'Hello World';
   }
 
-  // usar earclipping pra triangularizar graficos
+  //  ================= fim das observação =======================
+
+  // usar earclipping pra triangularizar poligonos
   const rastComplexPolygon = () => {
     return false;
   }
 
-  // parametrica serve para gerar pontos x1 = r * cos(teta) + h | x2 = r * sen(teta) + k
+  // parametrica serve para gerar pontos: x1 = r * cos(teta) + h | x2 = r * sen(teta) + k
   // gerando vértices para transformar o círculo em triângulos.
   const parametrica = (raio, pontos = 10) => {
     const vertices = [];
     const twoPi = Math.PI * 2;
 
     for(let i = 0; i <= pontos; i++){
-      const x1 = Math.round(raio * Math.cos(((twoPi * i) / pontos)));
-      const x2 = Math.round(raio * Math.sin(((twoPi * i) / pontos)))
+      // multiplicando 2 pi por i e dividindo pelo número de pontos para  o intervalo de [0,2pi] onde:
+      //  i = 0 equivale a pi = 0 
+      //  i = pontos equivale à 2 pi;
+      const teta = (twoPi * i) / pontos;
+
+      const x1 = Math.round(raio * Math.cos(teta));
+      const x2 = Math.round(raio * Math.sin(teta));
 
       vertices.push([x1, x2])
     }
@@ -55,9 +64,8 @@
     return triangles;
   }
 
-  // equação implicíta da reta:
+  // rasterização de círculos usando equação implicíta da reta:
   // (x1 - h)^2 + (x2 - k)^2 = r^2 se p está na borda || < r^2 no interior || > r^2 no exterior
-
   const rastCircle = (x, y, r, center) => {
     const k = center[0];
     const h = center[1];
@@ -114,8 +122,6 @@
     switch(primitive.shape){
       case 'circle':
         return rastCircle(x, y, primitive.radius, primitive.center);
-      case 'polygon':
-        return rastSimplePolygon(x, y, primitive);
       default:
         return rastSimplePolygon(x, y, primitive);
     }
@@ -188,8 +194,8 @@
         if(primitive.shape === 'circle'){
           primitive.center = primitive.center.selection.data;
 
-          // usando 10 pontos na função que transforma para triangulo para ficar mais evidente a transformação
-          const triangles = circleToTriangles(primitive, 10);
+          // usando o tamanho do raio para quantidade de pontos na triangularização do circulo
+          const triangles = circleToTriangles(primitive, primitive.radius);
           newScene.push(...triangles);
         } else {
           newScene.push(scene[i]);
@@ -197,8 +203,9 @@
 
       }
 
-      // Descomentar a linha abaixo para usar os círculos transformatos em triangulos
-      // scene = newScene;
+      // comentar a linha abaixo para usar a rasterização normal do círculo, sem triangulizar
+      scene = newScene;
+      console.log('scene =', scene);
 
       var preprop_scene = [];
 
@@ -230,7 +237,6 @@
 
             // First, we check if the pixel center is inside the primitive 
             if ( inside( x, y, primitive ) ) {
-              // only solid colors for now
               color = primitive.color;
               this.set_pixel( i, this.height - (j + 1), color );
             } 
