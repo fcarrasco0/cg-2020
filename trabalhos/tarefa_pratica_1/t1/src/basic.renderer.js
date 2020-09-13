@@ -21,11 +21,12 @@
     return false;
   }
 
-  // parametrica serve para gerar pontos: x1 = r * cos(teta) + h | x2 = r * sen(teta) + k
+  // parametrica serve para gerar pontos: x1 = r * cos(teta) + k | x2 = r * sen(teta) + h
   // gerando vértices para transformar o círculo em triângulos.
-  const parametrica = (raio, pontos = 10) => {
+  const parametrica = (primitive, pontos = 10) => {
     const vertices = [];
     const twoPi = Math.PI * 2;
+    const { center, radius } = primitive
 
     for(let i = 0; i <= pontos; i++){
       // multiplicando 2 pi por i e dividindo pelo número de pontos para  o intervalo de [0,2pi] onde:
@@ -33,8 +34,8 @@
       //  i = pontos equivale à 2 pi;
       const teta = (twoPi * i) / pontos;
 
-      const x1 = Math.round(raio * Math.cos(teta));
-      const x2 = Math.round(raio * Math.sin(teta));
+      const x1 = Math.round(radius * Math.cos(teta)) + center[0];
+      const x2 = Math.round(radius * Math.sin(teta)) + center[1];
 
       vertices.push([x1, x2])
     }
@@ -47,15 +48,15 @@
     const triangles = [];
 
     const { center } = primitive;
-    const vertices = parametrica(primitive.radius, pontos);
+    const vertices = parametrica(primitive, pontos);
   
     for(let i = 0; i < vertices.length-1; i++){
       triangles.push({  
         shape: "triangle",
         vertices: [ 
           [ center[0], center[1] ],
-          [ center[0] + vertices[i][0],  center[1] + vertices[i][1] ],
-          [ center[0] + vertices[i+1][0], center[1] + vertices[i+1][1] ]
+          [ vertices[i][0], vertices[i][1] ],
+          [ vertices[i+1][0], vertices[i+1][1] ]
         ],
         color: primitive.color    
       })
@@ -222,6 +223,7 @@
     },
 
     rasterize: function() {
+      console.log('INICIO DA RASTERIZAÇÃO', new Date().toISOString())
       var color;
 
       // In this loop, the image attribute must be updated after the rasterization procedure.
@@ -243,11 +245,7 @@
           }
         }
       }
-      console.log('vertices =', primitive.vertices);
-      console.log('vectors =', primitive.vectors);
-      console.log('center =', primitive.center);
-      console.log('limits =', primitive.boundingBox);
-      console.log('FIM DA RASTERIZAÇÃO')
+      console.log('FIM DA RASTERIZAÇÃO', new Date().toISOString())
     },
 
     set_pixel: function( i, j, colorarr ) {
