@@ -9,13 +9,13 @@ THREE.Object3D.prototype.savePosition = function() {
     }
 }();
 
-THREE.Object3D.prototype.rotateAroundPoint = function() {
-    return function (point, theta, pointIsWorld = false, axis = new THREE.Vector3(0, 0, 1)) {
-    // point: Vector3 -  center of rotation
-    // theta: float - rotation angle (in radians)
-    // pointIsWord: bool
+// point: Vector3 -  center of rotation
+// theta: float - rotation angle (in radians)
+// pointIsWord: bool
+THREE.Object3D.prototype.rotateAroundPoint = function (point, theta, axis = {x:0, y:0, z:1}, pointIsWorld = false) {
+    axis = new THREE.Vector3(axis.x, axis.y, axis.z)
         if(pointIsWorld){
-            this.parent.localToWorld(this.position); // compensate for world coordinate
+            this.parent.localToWorld(this.position);
         }
     
         this.position.sub(point); // remove the offset
@@ -29,16 +29,12 @@ THREE.Object3D.prototype.rotateAroundPoint = function() {
         this.rotateOnAxis(axis, theta); // rotate the OBJECT
 
         return this;
-    }
-
-}();
+    };
 
 
 // ThreeJS variables
 var camera, scene, renderer;
-// Optional (showFps)
 var stats;
-// Objects in Scene
 var robot;
 
 
@@ -62,19 +58,22 @@ function gen_robot() {
     // face
     var left_eye = gen_circle(0.25, 30);
     var right_eye = left_eye.clone();
+    var mouth = gen_circle(0.005, 30);
     
     left_eye.name = 'left_eye'
     right_eye.name = 'right_eye'
+    mouth.name = 'mouth';
 
     head.add(left_eye);
     head.add(right_eye);
+    head.add(mouth);
 
     left_eye.position.x = -0.5;
     right_eye.position.x = 0.5;
 
     left_eye.position.y = 0.3;
     right_eye.position.y = 0.3;
-
+    mouth.position.y = -0.8
 
     // left: upper arm, arm, hand
     var left_upper_arm = gen_rect(1.2, 4);
@@ -128,14 +127,9 @@ function gen_robot() {
     torso.add(left_upper_leg);
     torso.add(right_upper_leg);
 
-    // TO DO: add remaining robot parts hierarchical relations
-
-
     robot.name = "robot";
-
     return robot
 }
-
 
 // Auxiliary function to generate rectangle
 function gen_rect( width, height ) {
@@ -173,9 +167,10 @@ function gen_triangle( size, v1 = new THREE.Vector3(-0.8, 0, 0), v2 = new THREE.
 }
 
 function init() {
-    // Canvas height/height 
+    // Canvas width/height 
     var width = 45;
     var height = 27;
+
     // Setting up camera
     camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 0, 2 );
     camera.lookAt( 0, 0, -1);
@@ -189,6 +184,7 @@ function init() {
     // Setting up renderer
     renderer = new THREE.WebGLRenderer({ antialias: true });
     window.addEventListener('resize', onWindowResize, false);
+    
     /* renderer.setViewport( vpXmin, vpYmin, vpXwidth, vpYheight );  Unused */ 
     renderer.setSize(window.innerWidth, window.innerHeight); 
     
@@ -234,41 +230,93 @@ function onDocumentKeyDown(event) {
     console.log(event.which);
 }
 
-function animate() {
-    
-    requestAnimationFrame(animate);
-    
+function createRotationPoint(x, y, z) {
+  return new THREE.Vector3 (x, y, z);
+}
+
+var i = 0.0;
+
+function robotWave (i = 0) {
+  var rate = 0.015;
+  var upperArmRotPt;
+  var lowerArmRotPt;
+  var handRotPt;
+
+  var right_upper_arm = robot.getObjectByName("right_upper_arm");
+  var right_lower_arm = right_upper_arm.getObjectByName("lower_arm");
+  var right_hand = right_lower_arm.getObjectByName("hand");
+
+
+  upperArmRotPt = createRotationPoint(
+    ( right_upper_arm.geometry.parameters.width + right_upper_arm.__position.x) / 1.6,
+    ( right_upper_arm.geometry.parameters.height + right_upper_arm.__position.y) / 1.8,
+    0
+  );
+
+  lowerArmRotPt = createRotationPoint(
+      ( 0) / 2,
+      ( right_lower_arm.__position.y  ) / 1.6,
+      0
+  );
+
+  handRotPt = createRotationPoint(
+    ( 0) / 2,
+    ( right_hand.__position.y  ) / 1.6,
+    0
+  );
+  
+  if( i < 110) {  
     // Sample animation, you should implement at least 3 animations:
     // One is the hand wave (as in lecture 3.4)
     // The other two: explore your creativity =)
-    var rot_pt;
     
-    var right_upper_arm = ( (robot.getObjectByName("right_upper_arm")) )
-    rot_pt = new THREE.Vector3
-        (
-            ( right_upper_arm.geometry.parameters.width + right_upper_arm.__position.x) / 2,
-            ( right_upper_arm.geometry.parameters.height + right_upper_arm.__position.y) / 2.25,
-            0
-        );
-    right_upper_arm.rotateAroundPoint( rot_pt, -0.01 );
+    right_upper_arm.rotateAroundPoint( upperArmRotPt, rate );
+    right_lower_arm.rotateAroundPoint( lowerArmRotPt, rate - 0.003 );
+
+  } else if (i < 120) {
+    right_lower_arm.rotateAroundPoint( lowerArmRotPt, rate - 0.003 );
+
+  } else if( i < 130) {
+    rate = rate + 0.05
     
+    right_hand.rotateAroundPoint( handRotPt, rate );
 
-    var right_lower_arm = ( (robot.getObjectByName("right_upper_arm")).getObjectByName("lower_arm") );
-    rot_pt = new THREE.Vector3
-        (
-            ( 0) / 2,
-            ( right_lower_arm.__position.y  ) / 1.6,
-            0
-        );
-    right_lower_arm.rotateAroundPoint( rot_pt, 0.005 );
-     
+  } else if( i < 150) {
+    rate = rate + 0.05
+    right_hand.rotateAroundPoint( handRotPt, -rate );
+  }
+  // var head = robot.getObjectByName("head");
+  // var mouth = head.getObjectByName("mouth");
+  // mouth.geometry.parameters.radius += 0.15
+  
+  // console.log(mouth.geometry.parameters.radius)
+
+  // renderer.render(scene, camera);
+}
+
+function resetRobotPosition () {
+  scene = scene.remove(robot);
+
+  robot = gen_robot();
+  scene = scene.add(robot);
+
+  return renderer.render(scene, camera);
+}
+
+function animate() {
+
+  if(i < 150) {
+    robotWave(i);
+    i++ 
+  }
+      
+  requestAnimationFrame(animate);
     
-
-    // Update changes to renderer
-    stats.update();
-    renderer.render(scene, camera);
-
+  // Update changes to renderer
+  stats.update();
+  renderer.render(scene, camera);
+  
 }
 
 init();
-animate();
+animate(0);
