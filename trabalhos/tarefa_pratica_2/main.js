@@ -37,102 +37,11 @@ var camera, scene, renderer;
 var stats;
 var robot;
 
+// control variables
 var i = 0.0;
-var keyDown = false;
-var finish = false;
-
-// Function to generate robot
-// The strategy below is just a suggestion, you may change the shapes to create your customized robot
-
-function gen_robot() {
-    // Creating Group (not necessary, but better readability)
-    var robot = new THREE.Group();
-
-    // torso
-    var torso = gen_rect(4.5, 8);
-    torso.name = "torso";
-
-    // head
-    var head = gen_rect(2.5,3);
-    head.name = "head";
-    head.position.y = 5.6;
-    head.position.z = -0.05;  // Not necessary, makes head not in front of other robot parts
-
-    // face
-    var left_eye = gen_circle(0.25, 30);
-    var right_eye = left_eye.clone();
-    var mouth = gen_circle(0.005, 30);
-    
-    left_eye.name = 'left_eye'
-    right_eye.name = 'right_eye'
-    mouth.name = 'mouth';
-
-    head.add(left_eye);
-    head.add(right_eye);
-    head.add(mouth);
-
-    left_eye.position.x = -0.5;
-    right_eye.position.x = 0.5;
-
-    left_eye.position.y = 0.3;
-    right_eye.position.y = 0.3;
-    mouth.position.y = -0.8
-
-    // left: upper arm, arm, hand
-    var left_upper_arm = gen_rect(1.2, 4, 0x000d18);
-    var left_lower_arm = gen_rect(1, 3.5);
-    var left_hand = gen_triangle(1);
-
-    left_upper_arm.name = "left_upper_arm";
-    left_lower_arm.name = "lower_arm";
-    left_hand.name = "hand";
-    
-    left_upper_arm.add(left_lower_arm);
-    left_lower_arm.add(left_hand);
-    
-    left_hand.position.y = -2.65;
-    left_lower_arm.position.y = -3.7;
-    left_upper_arm.position.y = 1.8;
-    left_upper_arm.position.x = -3.1;
-
-    // right: upper arm, arm, hand
-    var right_upper_arm = left_upper_arm.clone();  
-    right_upper_arm.name = "right_upper_arm";
-    right_upper_arm.position.x = 3.1;
-    
-    // left: upper leg, leg, foot
-    var left_upper_leg = gen_rect(1.5,4);
-    var left_lower_leg = gen_rect(1.3,3.5);
-    var left_foot = gen_rect(1.8,0.5);
-
-    left_upper_leg.name = 'left_upper_leg';
-    left_lower_leg.name = 'lower_leg';
-    left_foot.name = 'foot';
-
-    left_upper_leg.add(left_lower_leg);
-    left_lower_leg.add(left_foot);
-    
-    left_foot.position.y = -2;
-    left_lower_leg.position.y = -3.6;
-    left_upper_leg.position.y = -6.2;
-    left_upper_leg.position.x = -1;
-
-    // right: upper leg, leg, foot
-    var right_upper_leg = left_upper_leg.clone();
-    right_upper_leg.name = 'right_upper_leg';
-    right_upper_leg.position.x = 1;
-
-    // Creating hieararchy
-    robot.add(torso);
-    torso.add(head);
-    torso.add(left_upper_arm);
-    torso.add(right_upper_arm);
-    torso.add(left_upper_leg);
-    torso.add(right_upper_leg);
-
-    robot.name = "robot";
-    return robot
-}
+var animationKeyDown = null;
+var lastKeyDown = null;
+var finishAnimation = false;
 
 // Auxiliary function to generate rectangle
 function gen_rect(width, height, color = 0x7ca4bd) {
@@ -223,188 +132,33 @@ function onWindowResize() {
 
 function onDocumentKeyDown(event) {
   // One for Hand wave, Two for your Custom Animation #2 and Three - Your Custom Animation #3
-  // For now, only prints inserted key
-  // console.log(event);
-  console.log(event.key);
-  keyDown = true;
-  return keyDown;
-}
-
-function createUpperArmRotationPoint(upperArm, left = false) {
-  var x = !left ? 1 : -1;
-
-  return new THREE.Vector3 (
-    ( (x * upperArm.geometry.parameters.width) + upperArm.__position.x) / 1.6,
-    ( upperArm.geometry.parameters.height + upperArm.__position.y) / 1.8,
-    0
-  );
-}
-
-function createUpperLegRotationPoint(leg, side = 'right') {
-  return new THREE.Vector3 (
-    ( 0),
-    ( leg.geometry.parameters.height + leg.__position.y) / 0.75,
-    0
-  );
-}
-
-function createLowerArmRotationPoint(lowerArm) {
-  return new THREE.Vector3 (
-    (0) / 2,
-    ( lowerArm.__position.y  ) / 1.6,
-    0
-  );
-}
-
-// rotation axis variables
-var rightArmAxis = { x:0, y:0, z:1 }
-var rightLegAxis = { x: -0.01, y: 0, z: 0.5 }
-
-var leftArmAxis = { x: 0, y: 0, z: -1 }
-var leftLegAxis = { x: 0.01, y: 0, z: -0.5 }
-
-function robotWave (i = 0) {
-  // starts rotation degree rates
-  var upperArmRate = 0.015;
-  var lowerArmRate = upperArmRate - 0.003;
-  var handRate = upperArmRate + 0.05;
-
-  // get robot parts
-  var right_upper_arm = robot.getObjectByName("right_upper_arm");
-  var right_lower_arm = right_upper_arm.getObjectByName("lower_arm");
-  var right_hand = right_lower_arm.getObjectByName("hand");
-
-  // console.log(right_upper_arm);
-  var upperArmRotPt = createUpperArmRotationPoint(right_upper_arm);
-  var lowerArmRotPt = createLowerArmRotationPoint(right_lower_arm);
-  var handRotPt = createLowerArmRotationPoint(right_hand);
-  
-  if( i < 110) {  
-    right_upper_arm.rotateAroundPoint(upperArmRotPt, upperArmRate, rightArmAxis);
-    right_lower_arm.rotateAroundPoint(lowerArmRotPt, lowerArmRate, rightArmAxis);
-
-  } else if (i < 120) {
-    right_lower_arm.rotateAroundPoint(lowerArmRotPt, lowerArmRate, rightArmAxis);
-
-  } else if( i < 130) {
-    right_hand.rotateAroundPoint(handRotPt, handRate, rightArmAxis);
-
-  } else if( i <= 150) {
-    right_hand.rotateAroundPoint(handRotPt, -handRate, rightArmAxis);
-    
-  } else if ( i === 160 && !keyDown){
-    resetRobotPosition();
-    return 0;
-  } else if (i === 160) {
-    resetRobotPosition();
-    finish = true;
-    return 0;
+  switch(event.key) {
+    case '1':
+      return animationKeyDown = '1';
+    case '2': 
+      return animationKeyDown = '2';
+    case '3':
+      return animationKeyDown = '3';
+    default:
+      return animationKeyDown = null;
   }
-
-
-  // var head = robot.getObjectByName("head");
-  // var mouth = head.getObjectByName("mouth");
-  // mouth.geometry.parameters.radius += 0.15
-  // head.add(mouth);
-  
-  // console.log(mouth.geometry.parameters.radius)
-  console.log(i);
-  return i + 1;
-}
-
-function polichinelo (i = 0) {
-  // starts rotation degree rates
-  var upperArmRate = 0.035;
-  var lowerArmRate = upperArmRate - 0.015;
-  var legRate = upperArmRate - 0.02;
-
-  var up = new THREE.Vector3(0, 0.03, 0);
-  var down = new THREE.Vector3(0,-0.03, 0);
-
-  // get robot parts
-  var torso = robot.getObjectByName('torso');
-
-  var right_upper_arm = robot.getObjectByName("right_upper_arm");
-  var right_lower_arm = right_upper_arm.getObjectByName("lower_arm");
-  var right_upper_leg = robot.getObjectByName('right_upper_leg');
-
-  var left_upper_arm = robot.getObjectByName('left_upper_arm');
-  var left_lower_arm = left_upper_arm.getObjectByName("lower_arm");
-  var left_upper_leg = robot.getObjectByName('left_upper_leg');
- 
-  // get rotation points for right limbs
-  var rightUpperArmRotPt = createUpperArmRotationPoint(right_upper_arm);
-  var rightLowerArmRotPt = createLowerArmRotationPoint(right_lower_arm);
-  var rightUpperLegRotPt = createUpperLegRotationPoint(right_upper_leg);
-
-  // get rotation points for left limbs
-  var leftUpperArmRotPt = createUpperArmRotationPoint(left_upper_arm, 1);
-  var leftLowerArmRotPt = createLowerArmRotationPoint(left_lower_arm);
-  var leftUpperLegRotPt = createUpperLegRotationPoint(left_upper_leg, 'left');
-  
-  if( i < 75) {  
-    // translate torso up
-    torso.position.add(up);
-    
-    right_upper_arm.rotateAroundPoint(rightUpperArmRotPt, upperArmRate, rightArmAxis);
-    right_lower_arm.rotateAroundPoint(rightLowerArmRotPt, lowerArmRate, rightArmAxis);
-    right_upper_leg.rotateAroundPoint(rightUpperLegRotPt, legRate, rightLegAxis);
-
-    left_upper_arm.rotateAroundPoint(leftUpperArmRotPt, upperArmRate, leftArmAxis);
-    left_lower_arm.rotateAroundPoint(leftLowerArmRotPt, lowerArmRate, leftArmAxis);
-    left_upper_leg.rotateAroundPoint(leftUpperLegRotPt, legRate, leftLegAxis);
-    
-  } else if (i < 150) {
-    // translate torso down
-    torso.position.add(down);
-
-    right_upper_arm.rotateAroundPoint(rightUpperArmRotPt, -upperArmRate, rightArmAxis);
-    right_lower_arm.rotateAroundPoint(rightLowerArmRotPt, -lowerArmRate, rightArmAxis);
-    right_upper_leg.rotateAroundPoint(rightUpperLegRotPt, -legRate, rightLegAxis );
-
-    left_upper_arm.rotateAroundPoint(leftUpperArmRotPt, -upperArmRate, leftArmAxis);
-    left_lower_arm.rotateAroundPoint(leftLowerArmRotPt, -lowerArmRate, leftArmAxis);
-    left_upper_leg.rotateAroundPoint(leftUpperLegRotPt, -legRate, leftLegAxis);
-
-  } else if (!keyDown && i > 150){
-    // restart the loop
-    resetRobotPosition();
-    
-    return 0;
-  } else if (i > 150) {
-    // finish the loop if another animation is selected
-    resetRobotPosition();
-    finish = true;
-
-    return 0;
-  }
-
-  return i + 1;
-}
-
-function resetRobotPosition () {
-  scene = scene.remove(robot);
-
-  robot = gen_robot();
-  scene = scene.add(robot);
-
-  scene.traverse( function( node ) {
-    if ( node instanceof THREE.Object3D ) {
-      node.savePosition();
-    }
-  });
-
-  return renderer.render(scene, camera);
 }
 
 function animate() {
 
-  // if(i <= 160 && !finish) {
-  //   i = robotWave(i);
-  // }
+  if((animationKeyDown === '1' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '1')) {
+    if (finishAnimation) finishAnimation = false;
+    i = robotWave(i);
+  }
 
-  if( i < 160 && !finish) {
+  if( (animationKeyDown === '2' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '2')) {
+    if (finishAnimation) finishAnimation = false;
     i = polichinelo(i);
+  };
+
+  if( (animationKeyDown === '3' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '3')) {
+    if (finishAnimation) finishAnimation = false;
+    i = robotRobbed(i);
   };
       
   requestAnimationFrame(animate);
