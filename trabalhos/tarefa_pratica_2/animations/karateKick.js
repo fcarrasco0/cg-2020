@@ -69,6 +69,10 @@ function kick(robot, kick = false) {
 function karateKick (i = 0) {
   lastKeyDown = '3';
   
+  // starts rotation degree rates
+  var upperArmRate = 0.05;
+
+  // get robot parts
   var torso = robot.getObjectByName('torso');
 
   var right_upper_arm = robot.getObjectByName("right_upper_arm");
@@ -79,10 +83,11 @@ function karateKick (i = 0) {
   var left_upper_arm = robot.getObjectByName("left_upper_arm");
   var left_lower_arm = left_upper_arm.getObjectByName("lower_arm");
 
+  // create local robot object to use in local functions
   var karateRobot = {
     rate: {
-      upperArmRate: 0.05,
-      lowerArmRate: 0.05 - 0.005,
+      upperArmRate,
+      lowerArmRate: upperArmRate - 0.005,
       legRate: 0.1,
     },
     part: {
@@ -120,7 +125,7 @@ function karateKick (i = 0) {
     kick(karateRobot, false);
 
   } else if(i < 130) {
-    jump(karateRobot);
+    jump(karateRobot, true);
 
   } else if(i < 155) {
     kick(karateRobot, true);

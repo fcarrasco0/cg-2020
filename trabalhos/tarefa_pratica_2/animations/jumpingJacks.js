@@ -1,14 +1,42 @@
+function jacksUp (robot, up = true) {
+  var clockRot = up ? 1 : -1;
+
+  robot.part.right_upper_arm.rotateAroundPoint(
+    robot.rot.upperRightArmRotPt, (clockRot * robot.rate.upperArmRate), robot.axis.rightArmAxis,
+  );
+  
+  robot.part.right_lower_arm.rotateAroundPoint(
+    robot.rot.lowerRightArmRotPt, (clockRot * robot.rate.lowerArmRate), robot.axis.rightArmAxis,
+  );
+  
+  robot.part.right_upper_leg.rotateAroundPoint(
+    robot.rot.rightUpperLegRotPt, (clockRot * robot.rate.legRate), robot.axis.rightLegAxis,
+  );
+
+  robot.part.left_upper_arm.rotateAroundPoint(
+    robot.rot.upperLeftArmRotPt, (clockRot * robot.rate.upperArmRate), robot.axis.leftArmAxis,
+  );
+  
+  robot.part.left_lower_arm.rotateAroundPoint(
+    robot.rot.lowerLeftArmRotPt, (clockRot * robot.rate.lowerArmRate), robot.axis.leftArmAxis,
+  );
+  
+  robot.part.left_upper_leg.rotateAroundPoint(
+    robot.rot.leftUpperLegRotPt, (clockRot * robot.rate.legRate), robot.axis.leftLegAxis,
+  );
+}
+
+function jumpingUp(robot, up = true) {
+  var move = up? new THREE.Vector3(0, 0.1, 0) : new THREE.Vector3(0,-0.1, 0);
+  robot.part.torso.position.add(move);
+};
+
 // jumping jacks animation
 function polichinelo (i = 0) {
   lastKeyDown = '2';
 
   // starts rotation degree rates
-  var upperArmRate = 0.035;
-  var lowerArmRate = upperArmRate - 0.015;
-  var legRate = upperArmRate - 0.02;
-
-  var up = new THREE.Vector3(0, 0.03, 0);
-  var down = new THREE.Vector3(0,-0.03, 0);
+  var upperArmRate = 0.1;
 
   // get robot parts
   var torso = robot.getObjectByName('torso');
@@ -21,46 +49,54 @@ function polichinelo (i = 0) {
   var left_lower_arm = left_upper_arm.getObjectByName("lower_arm");
   var left_upper_leg = robot.getObjectByName('left_upper_leg');
  
-  // get rotation points for right limbs
-  var rightUpperArmRotPt = createUpperArmRotationPoint(right_upper_arm);
-  var rightLowerArmRotPt = createLowerArmRotationPoint(right_lower_arm);
-  var rightUpperLegRotPt = createUpperLegRotationPoint(right_upper_leg);
-
-  // get rotation points for left limbs
-  var leftUpperArmRotPt = createUpperArmRotationPoint(left_upper_arm, 1);
-  var leftLowerArmRotPt = createLowerArmRotationPoint(left_lower_arm);
-  var leftUpperLegRotPt = createUpperLegRotationPoint(left_upper_leg);
+  // create local robot object to use in local functions
+  var jackRobot = {
+    rate: {
+      upperArmRate,
+      lowerArmRate: upperArmRate/1.4,
+      legRate: 0.045,
+    },
+    part: {
+      torso,
+      right_upper_arm,
+      right_lower_arm,
+      right_upper_leg,
+      
+      left_upper_arm,
+      left_lower_arm,
+      left_upper_leg,
+    },
+    rot: {
+      upperRightArmRotPt: createUpperArmRotationPoint(right_upper_arm),
+      lowerRightArmRotPt: createLowerArmRotationPoint(right_lower_arm),
+      rightUpperLegRotPt: createUpperLegRotationPoint(right_upper_leg),
   
-  if( i < 75) {  
-    // translate torso up
-    torso.position.add(up);
-    
-    right_upper_arm.rotateAroundPoint(rightUpperArmRotPt, upperArmRate, rightArmAxis);
-    right_lower_arm.rotateAroundPoint(rightLowerArmRotPt, lowerArmRate, rightArmAxis);
-    right_upper_leg.rotateAroundPoint(rightUpperLegRotPt, legRate, rightLegAxis);
+      upperLeftArmRotPt: createUpperArmRotationPoint(left_upper_arm, 'left'),
+      lowerLeftArmRotPt: createLowerArmRotationPoint(left_lower_arm),
+      leftUpperLegRotPt: createUpperLegRotationPoint(left_upper_leg),
+    },
+    axis: {
+      rightArmAxis,
+      rightLegAxis,
+      leftArmAxis,
+      leftLegAxis,
+    },
+  };
+ 
+  if( i < 25) {  
+    jumpingUp(jackRobot, true)
+    jacksUp(jackRobot, true);
 
-    left_upper_arm.rotateAroundPoint(leftUpperArmRotPt, upperArmRate, leftArmAxis);
-    left_lower_arm.rotateAroundPoint(leftLowerArmRotPt, lowerArmRate, leftArmAxis);
-    left_upper_leg.rotateAroundPoint(leftUpperLegRotPt, legRate, leftLegAxis);
-    
-  } else if (i < 150) {
-    // translate torso down
-    torso.position.add(down);
+  } else if (i < 50) {
+    jumpingUp(jackRobot, false)
+    jacksUp(jackRobot, false);
 
-    right_upper_arm.rotateAroundPoint(rightUpperArmRotPt, -upperArmRate, rightArmAxis);
-    right_lower_arm.rotateAroundPoint(rightLowerArmRotPt, -lowerArmRate, rightArmAxis);
-    right_upper_leg.rotateAroundPoint(rightUpperLegRotPt, -legRate, rightLegAxis );
-
-    left_upper_arm.rotateAroundPoint(leftUpperArmRotPt, -upperArmRate, leftArmAxis);
-    left_lower_arm.rotateAroundPoint(leftLowerArmRotPt, -lowerArmRate, leftArmAxis);
-    left_upper_leg.rotateAroundPoint(leftUpperLegRotPt, -legRate, leftLegAxis);
-
-  } else if (animationKeyDown === '2' && i > 150){
+  } else if (i > 50 && animationKeyDown === '2'){
     // restart the loop
     resetRobotPosition();
     
     return 0;
-  } else if (i > 150) {
+  } else if (i > 50) {
     // finish the loop if another animation is selected
     resetRobotPosition();
 
