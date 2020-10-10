@@ -139,6 +139,8 @@ function onDocumentKeyDown(event) {
       return animationKeyDown = '2';
     case '3':
       return animationKeyDown = '3';
+    case 'r':
+      return animationKeyDown = 'r';
     default:
       return animationKeyDown = null;
   }
@@ -146,16 +148,28 @@ function onDocumentKeyDown(event) {
 
 function animate() {
 
+  // reset animation instantly pushing r key
+  if(animationKeyDown === 'r'){
+    i = 0;
+    lastKeyDown = null;
+    finishAnimation = 1;
+
+    resetRobotPosition();
+  }
+
+  // animation 1 called
   if((animationKeyDown === '1' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '1')) {
     if (finishAnimation) finishAnimation = false;
     i = robotWave(i);
   }
 
+  // animation 2 called
   if( (animationKeyDown === '2' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '2')) {
     if (finishAnimation) finishAnimation = false;
     i = polichinelo(i);
   };
 
+  // animation 3 called
   if( (animationKeyDown === '3' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '3')) {
     if (finishAnimation) finishAnimation = false;
     i = karateKick(i);
