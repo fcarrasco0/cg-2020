@@ -6,11 +6,11 @@ function gen_robot() {
   var robot = new THREE.Group();
 
   // torso
-  var torso = gen_rect(4.5, 8, 0x9900ff);
+  var torso = gen_rect(4.5, 8, 0xF2C335);
   torso.name = "torso";
 
   // head
-  var head = gen_rect(2.5,3, 0x7B25AA);
+  var head = gen_rect(2.5,3, 0x8D07F6);
   head.name = "head";
   head.position.y = 5.6;
   head.position.z = -0.05;  // Not necessary, makes head not in front of other robot parts
@@ -36,8 +36,8 @@ function gen_robot() {
   mouth.position.y = -0.8
 
   // left: upper arm, arm, hand
-  var left_upper_arm = gen_rect(1.2, 4, 0x5167AC);
-  var left_lower_arm = gen_rect(1, 3.5);
+  var left_upper_arm = gen_rect(1.2, 4, 0x8D07F6);
+  var left_lower_arm = gen_rect(1, 3.5, 0xA6ABAB);
   var left_hand = gen_triangle(1);
 
   left_upper_arm.name = "left_upper_arm";
@@ -58,9 +58,9 @@ function gen_robot() {
   right_upper_arm.position.x = 3.1;
   
   // left: upper leg, leg, foot
-  var left_upper_leg = gen_rect(1.5,4, 0x5167AC);
-  var left_lower_leg = gen_rect(1.3,3.5);
-  var left_foot = gen_rect(1.8,0.5, 0xff751a);
+  var left_upper_leg = gen_rect(1.5,4, 0x595048);
+  var left_lower_leg = gen_rect(1.3,3.5, 0x595048);
+  var left_foot = gen_rect(1.8,0.5, 0xF29A2E);
 
   left_upper_leg.name = 'left_upper_leg';
   left_lower_leg.name = 'lower_leg';
