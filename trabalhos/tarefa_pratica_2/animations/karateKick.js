@@ -69,12 +69,6 @@ function kick(robot, kick = false) {
 function karateKick (i = 0) {
   lastKeyDown = '3';
   
-  // starts rotation degree rates
-  var upperArmRate = 0.05;
-  var lowerArmRate = upperArmRate - 0.005;
-  var legRate = 0.1;
-
-  // get robot parts
   var torso = robot.getObjectByName('torso');
 
   var right_upper_arm = robot.getObjectByName("right_upper_arm");
@@ -85,45 +79,35 @@ function karateKick (i = 0) {
   var left_upper_arm = robot.getObjectByName("left_upper_arm");
   var left_lower_arm = left_upper_arm.getObjectByName("lower_arm");
 
-  var upperRightArmRotPt = createUpperArmRotationPoint(right_upper_arm);
-  var lowerRightArmRotPt = createLowerArmRotationPoint(right_lower_arm);
-  var rightUpperLegRotPt = createUpperLegRotationPoint(right_upper_leg);
-  var rightLowerLegRotPt = createUpperLegRotationPoint(right_lower_leg);
-
-  var upperLeftArmRotPt = createUpperArmRotationPoint(left_upper_arm, 'left');
-  var lowerLeftArmRotPt = createLowerArmRotationPoint(left_lower_arm);
-
   var karateRobot = {
+    rate: {
+      upperArmRate: 0.05,
+      lowerArmRate: 0.05 - 0.005,
+      legRate: 0.1,
+    },
     part: {
       torso,
-
       right_upper_arm,
       right_lower_arm,
       right_upper_leg,
       right_lower_leg,
-      
       left_upper_arm,
       left_lower_arm,
     },
     rot: {
-      upperRightArmRotPt,
-      lowerRightArmRotPt,
-      rightUpperLegRotPt,
-      rightLowerLegRotPt,
-
-      upperLeftArmRotPt,
-      lowerLeftArmRotPt,
+      upperRightArmRotPt: createUpperArmRotationPoint(right_upper_arm),
+      lowerRightArmRotPt: createLowerArmRotationPoint(right_lower_arm),
+      rightUpperLegRotPt: createUpperLegRotationPoint(right_upper_leg),
+      rightLowerLegRotPt: createUpperLegRotationPoint(right_lower_leg),
+  
+      upperLeftArmRotPt: createUpperArmRotationPoint(left_upper_arm, 'left'),
+      lowerLeftArmRotPt: createLowerArmRotationPoint(left_lower_arm),
     },
     axis: {
       rightArmAxis,
       rightLegAxis,
       leftArmAxis,
     },
-    rate: {
-      upperArmRate,
-      lowerArmRate,
-      legRate,
-    }
   }
 
   if( i < 25) {
@@ -150,12 +134,12 @@ function karateKick (i = 0) {
 
   } else if (i < 250) { 
     fightPosition(karateRobot, false);
-  } else if ( i > 300 && animationKeyDown === '3'){
+  } else if ( i > 275 && animationKeyDown === '3'){
     // restart animation
 
     resetRobotPosition();
     return 0;
-  } else if (i > 300) {
+  } else if (i > 275) {
     // finish the loop if another animation is selected
 
     resetRobotPosition();
