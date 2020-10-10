@@ -158,7 +158,7 @@ function animate() {
 
   if( (animationKeyDown === '3' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '3')) {
     if (finishAnimation) finishAnimation = false;
-    i = robotRobbed(i);
+    i = karateKick(i);
   };
       
   requestAnimationFrame(animate);
