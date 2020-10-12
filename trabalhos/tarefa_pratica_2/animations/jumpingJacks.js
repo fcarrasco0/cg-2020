@@ -38,7 +38,7 @@ function jacksUp (robot, up = true) {
   upperLeftArm.rotateAroundPoint(upperLeftArmRotPt, (clockRot * upperArmRate), leftArmAxis);
   lowerLeftArm.rotateAroundPoint(lowerLeftArmRotPt, (clockRot * lowerArmRate), leftArmAxis);
   
-  // rotate legs 60 degrees
+  // rotate legs while currentDegree is lesser than 60 degrees
   if(rotateUntil((i * robot.legDegreeRate), 'lesser', 60)){
     rightLeg.rotateAroundPoint(rightUpperLegRotPt, (clockRot * legRate), rightLegAxis);
     leftLeg.rotateAroundPoint(leftUpperLegRotPt, (clockRot * legRate), leftLegAxis);
@@ -49,7 +49,6 @@ function jumpingUp(robot, up = true) {
   var move = up? new THREE.Vector3(0, 0.1, 0) : new THREE.Vector3(0,-0.1, 0);
   robot.torso.position.add(move);
 };
-
 
 var i = 0
 var stage = 1 // 1 - first rotation | 2 - second rotation | 3 - etc.

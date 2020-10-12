@@ -23,7 +23,7 @@ function fightPosition( robot, start = false) {
   var rightArmAxis = robot.rightArmAxis;
   var leftArmAxis = robot.leftArmAxis;
 
-  // rotates upper arms to limit degree
+  // checks if currentDegree is greater than limit degree
   if(rotateUntil((i * robot.upperDegreeRate), 'greater', degree)){
     stage++;
     return i = 0;
