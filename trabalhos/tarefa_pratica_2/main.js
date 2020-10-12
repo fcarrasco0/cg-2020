@@ -38,7 +38,6 @@ var stats;
 var robot;
 
 // control variables
-var i = 0.0;
 var animationKeyDown = null;
 var lastKeyDown = null;
 var finishAnimation = false;
@@ -146,6 +145,16 @@ function onDocumentKeyDown(event) {
   }
 }
 
+function radianToDegree (radian) {
+  return (radian * 180) / Math.PI;
+}
+
+function rotateUntil (currentDegree, limitDegree, greater = true) {
+  if(greater) return Math.round(currentDegree) > limitDegree
+  
+  return Math.round(currentDegree) < limitDegree
+}
+
 function animate() {
 
   // reset animation instantly pushing r key
@@ -160,19 +169,19 @@ function animate() {
   // animation 1 called
   if((animationKeyDown === '1' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '1')) {
     if (finishAnimation) finishAnimation = false;
-    i = robotWave(i);
+    robotWave();
   }
 
   // animation 2 called
   if( (animationKeyDown === '2' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '2')) {
     if (finishAnimation) finishAnimation = false;
-    i = polichinelo(i);
+    polichinelo();
   };
 
   // animation 3 called
   if( (animationKeyDown === '3' && !lastKeyDown) || (!finishAnimation && lastKeyDown === '3')) {
     if (finishAnimation) finishAnimation = false;
-    i = karateKick(i);
+    karateKick();
   };
       
   requestAnimationFrame(animate);

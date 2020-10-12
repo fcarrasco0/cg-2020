@@ -1,10 +1,20 @@
-function robotWave (i = 0) {
+var i = 0
+var stage = 1 // 1 - first rotation | 2 - second rotation | 3 - etc.
+
+function robotWave () {
   lastKeyDown = '1';
 
+  // starts rotation radians rates
+  var baseRadRate = 0.04;
+
+  var upperArmRate = baseRadRate;
+  var lowerArmRate = baseRadRate - 0.01;
+  var handRate = baseRadRate + 0.05;
+
   // starts rotation degree rates
-  var upperArmRate = 0.025;
-  var lowerArmRate = upperArmRate - 0.017;
-  var handRate = upperArmRate + 0.05;
+  var upperDegreeRate = radianToDegree(baseRadRate);
+  var lowerDegreeRate = radianToDegree(lowerArmRate);
+  var handDegreeRate = radianToDegree(handRate);
 
   // get robot parts
   var right_upper_arm = robot.getObjectByName("right_upper_arm");
@@ -14,38 +24,67 @@ function robotWave (i = 0) {
   var upperArmRotPt = createUpperArmRotationPoint(right_upper_arm);
   var lowerArmRotPt = createLowerArmRotationPoint(right_lower_arm);
   var handRotPt = createLowerArmRotationPoint(right_hand);
-  
-  if( i < 90) {  
-    // lift upper arm
-    right_upper_arm.rotateAroundPoint(upperArmRotPt, upperArmRate, rightArmAxis);
-    right_lower_arm.rotateAroundPoint(lowerArmRotPt, lowerArmRate, rightArmAxis);
 
-  } else if (i < 100) {
-    // lift lower arm
-    right_lower_arm.rotateAroundPoint(lowerArmRotPt, lowerArmRate, rightArmAxis);
+  switch(stage) {
+    case 1: {
+      // rotate upper arm 105 degrees
+      if (rotateUntil((i * upperDegreeRate), 105)) {
+        stage = 2;
+        return i = 0;
+      }
 
-  } else if( i < 110) {
-    // wave towards the body
-    right_hand.rotateAroundPoint(handRotPt, handRate, rightArmAxis);
-
-  } else if( i <= 125) {
-    // wave away from the body
-    right_hand.rotateAroundPoint(handRotPt, -handRate, rightArmAxis);
+      right_upper_arm.rotateAroundPoint(upperArmRotPt, upperArmRate, rightArmAxis);
     
-  } else if ( i > 150 && animationKeyDown === '1'){
-    // restart animation
-    resetRobotPosition();
+      // rotate lower arm 45 degrees
+      if(rotateUntil((i * lowerDegreeRate), 45, false)){
+        right_lower_arm.rotateAroundPoint(lowerArmRotPt, lowerArmRate, rightArmAxis);
+      }
+      return i++;
+    }
+    case 2: {
+      // rotate lower arm 25 degrees
+      if (rotateUntil((i * lowerDegreeRate), 25)) {
+        stage = 3;
+        return i = 0;
+      }
+      
+      right_lower_arm.rotateAroundPoint(lowerArmRotPt, lowerArmRate, rightArmAxis);
+      return i++;
+    }
+    case 3:{
+      // rotate hand 30 degrees
+      if (rotateUntil((i * handDegreeRate), 30)) {
+        stage = 4;
+        return i = 0;
+      }
 
-    return 0;
-  } else if (i > 150) {
-    // finish the loop if another animation is selected
-    resetRobotPosition();
-    
-    lastKeyDown = null;
-    finishAnimation = 1;
+      right_hand.rotateAroundPoint(handRotPt, handRate, rightArmAxis);
+      return i++;
+    }
+    case 4: {
+      // rotate hand on opposite direction 65 degrees
+      if (rotateUntil((i * handDegreeRate), 65)) {
+        stage = 0;
+        return i = 0;
+      }
 
-    return 0;
+      right_hand.rotateAroundPoint(handRotPt, -handRate, rightArmAxis);
+      return i++;
+    }
+    default: {
+      if( i > 10){
+        resetRobotPosition();
+        stage = 1;
+
+        if(animationKeyDown !== '1') {
+          lastKeyDown = null;
+          finishAnimation = 1;
+        }
+
+        return i = 0;
+      }
+
+      return i++;
+    }
   }
-
-  return i + 1;
 }
