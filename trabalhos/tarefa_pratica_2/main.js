@@ -13,7 +13,7 @@ THREE.Object3D.prototype.savePosition = function() {
 // pointIsWord: bool
 THREE.Object3D.prototype.rotateAroundPoint = function (point, theta, axis, pointIsWorld = false) {
   axis = new THREE.Vector3(axis.x, axis.y, axis.z)
-  
+
   if(pointIsWorld){
     this.parent.localToWorld(this.position);
   }
@@ -149,8 +149,8 @@ function radianToDegree (radian) {
   return (radian * 180) / Math.PI;
 }
 
-function rotateUntil (currentDegree, limitDegree, greater = true) {
-  if(greater) return Math.round(currentDegree) > limitDegree
+function rotateUntil (currentDegree, condition = '', limitDegree) {
+  if(condition === 'greater') return Math.round(currentDegree) > limitDegree
   
   return Math.round(currentDegree) < limitDegree
 }

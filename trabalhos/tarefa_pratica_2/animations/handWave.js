@@ -28,7 +28,7 @@ function robotWave () {
   switch(stage) {
     case 1: {
       // rotate upper arm 105 degrees
-      if (rotateUntil((i * upperDegreeRate), 105)) {
+      if (rotateUntil((i * upperDegreeRate), 'greater', 105)) {
         stage = 2;
         return i = 0;
       }
@@ -36,14 +36,14 @@ function robotWave () {
       right_upper_arm.rotateAroundPoint(upperArmRotPt, upperArmRate, rightArmAxis);
     
       // rotate lower arm 45 degrees
-      if(rotateUntil((i * lowerDegreeRate), 45, false)){
+      if(rotateUntil((i * lowerDegreeRate), 'less', 45)){
         right_lower_arm.rotateAroundPoint(lowerArmRotPt, lowerArmRate, rightArmAxis);
       }
       return i++;
     }
     case 2: {
       // rotate lower arm 25 degrees
-      if (rotateUntil((i * lowerDegreeRate), 25)) {
+      if (rotateUntil((i * lowerDegreeRate), 'greater', 25)) {
         stage = 3;
         return i = 0;
       }
@@ -53,7 +53,7 @@ function robotWave () {
     }
     case 3:{
       // rotate hand 30 degrees
-      if (rotateUntil((i * handDegreeRate), 30)) {
+      if (rotateUntil((i * handDegreeRate), 'greater', 30)) {
         stage = 4;
         return i = 0;
       }
@@ -63,7 +63,7 @@ function robotWave () {
     }
     case 4: {
       // rotate hand on opposite direction 65 degrees
-      if (rotateUntil((i * handDegreeRate), 65)) {
+      if (rotateUntil((i * handDegreeRate), 'greater', 65)) {
         stage = 0;
         return i = 0;
       }
