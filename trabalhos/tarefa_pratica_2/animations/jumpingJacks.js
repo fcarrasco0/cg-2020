@@ -1,42 +1,72 @@
 function jacksUp (robot, up = true) {
   var clockRot = up ? 1 : -1;
+  
+  // robot parts
+  var upperRightArm = robot.right_upper_arm;
+  var lowerRightArm = robot.right_lower_arm;
+  var rightLeg = robot.right_upper_leg;
 
-  robot.part.right_upper_arm.rotateAroundPoint(
-    robot.rot.upperRightArmRotPt, (clockRot * robot.rate.upperArmRate), robot.axis.rightArmAxis,
-  );
-  
-  robot.part.right_lower_arm.rotateAroundPoint(
-    robot.rot.lowerRightArmRotPt, (clockRot * robot.rate.lowerArmRate), robot.axis.rightArmAxis,
-  );
-  
-  robot.part.right_upper_leg.rotateAroundPoint(
-    robot.rot.rightUpperLegRotPt, (clockRot * robot.rate.legRate), robot.axis.rightLegAxis,
-  );
+  var upperLeftArm = robot.left_upper_arm;
+  var lowerLeftArm = robot.left_lower_arm;
+  var leftLeg = robot.left_upper_leg;
 
-  robot.part.left_upper_arm.rotateAroundPoint(
-    robot.rot.upperLeftArmRotPt, (clockRot * robot.rate.upperArmRate), robot.axis.leftArmAxis,
-  );
+  // rotation points
+  var upperRightArmRotPt = robot.upperRightArmRotPt;
+  var lowerRightArmRotPt = robot.lowerRightArmRotPt;
+  var rightUpperLegRotPt = robot.rightUpperLegRotPt;
+
+  var upperLeftArmRotPt = robot.upperLeftArmRotPt;
+  var lowerLeftArmRotPt = robot.lowerLeftArmRotPt;
+  var leftUpperLegRotPt = robot.leftUpperLegRotPt;
+
+  // radian rates
+  var upperArmRate = robot.upperArmRate;
+  var lowerArmRate = robot.lowerArmRate;
+  var legRate = robot.legRate;
+
+  // axis
+  var rightArmAxis = robot.rightArmAxis;
+  var rightLegAxis = robot.rightLegAxis;
+
+  var leftArmAxis = robot.leftArmAxis;
+  var leftLegAxis = robot.leftLegAxis;
+
+  // arms rotation
+  upperRightArm.rotateAroundPoint(upperRightArmRotPt, (clockRot * upperArmRate), rightArmAxis);
+  lowerRightArm.rotateAroundPoint(lowerRightArmRotPt, (clockRot * lowerArmRate), rightArmAxis);
   
-  robot.part.left_lower_arm.rotateAroundPoint(
-    robot.rot.lowerLeftArmRotPt, (clockRot * robot.rate.lowerArmRate), robot.axis.leftArmAxis,
-  );
+  upperLeftArm.rotateAroundPoint(upperLeftArmRotPt, (clockRot * upperArmRate), leftArmAxis);
+  lowerLeftArm.rotateAroundPoint(lowerLeftArmRotPt, (clockRot * lowerArmRate), leftArmAxis);
   
-  robot.part.left_upper_leg.rotateAroundPoint(
-    robot.rot.leftUpperLegRotPt, (clockRot * robot.rate.legRate), robot.axis.leftLegAxis,
-  );
+  // rotate legs 60 degrees
+  if(rotateUntil((i * robot.legDegreeRate), 'lesser', 60)){
+    rightLeg.rotateAroundPoint(rightUpperLegRotPt, (clockRot * legRate), rightLegAxis);
+    leftLeg.rotateAroundPoint(leftUpperLegRotPt, (clockRot * legRate), leftLegAxis);
+  }
+  
 }
 
 function jumpingUp(robot, up = true) {
   var move = up? new THREE.Vector3(0, 0.1, 0) : new THREE.Vector3(0,-0.1, 0);
-  robot.part.torso.position.add(move);
+  robot.torso.position.add(move);
 };
 
+
+var i = 0
+var stage = 1 // 1 - first rotation | 2 - second rotation | 3 - etc.
+
 // jumping jacks animation
-function polichinelo (i = 0) {
+function polichinelo () {
   lastKeyDown = '2';
 
+  // starts rotation radian rates
+  var upperArmRate = 0.15;
+  var lowerArmRate = upperArmRate/2;
+  var legRate = upperArmRate/2.5;
+
   // starts rotation degree rates
-  var upperArmRate = 0.1;
+  var upperDegreeRate = radianToDegree(upperArmRate);
+  var legDegreeRate = radianToDegree(legRate);
 
   // get robot parts
   var torso = robot.getObjectByName('torso');
@@ -51,60 +81,71 @@ function polichinelo (i = 0) {
  
   // create local robot object to use in local functions
   var jackRobot = {
-    rate: {
-      upperArmRate,
-      lowerArmRate: upperArmRate/1.4,
-      legRate: 0.045,
-    },
-    part: {
-      torso,
-      right_upper_arm,
-      right_lower_arm,
-      right_upper_leg,
-      
-      left_upper_arm,
-      left_lower_arm,
-      left_upper_leg,
-    },
-    rot: {
-      upperRightArmRotPt: createUpperArmRotationPoint(right_upper_arm),
-      lowerRightArmRotPt: createLowerArmRotationPoint(right_lower_arm),
-      rightUpperLegRotPt: createUpperLegRotationPoint(right_upper_leg),
-  
-      upperLeftArmRotPt: createUpperArmRotationPoint(left_upper_arm, 'left'),
-      lowerLeftArmRotPt: createLowerArmRotationPoint(left_lower_arm),
-      leftUpperLegRotPt: createUpperLegRotationPoint(left_upper_leg),
-    },
-    axis: {
-      rightArmAxis,
-      rightLegAxis,
-      leftArmAxis,
-      leftLegAxis,
-    },
-  };
- 
-  if( i < 25) {  
-    jumpingUp(jackRobot, true)
-    jacksUp(jackRobot, true);
+    // degree rates
+    upperDegreeRate,
+    legDegreeRate,
 
-  } else if (i < 50) {
-    jumpingUp(jackRobot, false)
-    jacksUp(jackRobot, false);
-
-  } else if (i > 50 && animationKeyDown === '2'){
-    // restart the loop
-    resetRobotPosition();
+    // radian rates
+    upperArmRate,
+    lowerArmRate,
+    legRate,
     
-    return 0;
-  } else if (i > 50) {
-    // finish the loop if another animation is selected
-    resetRobotPosition();
+    // parts
+    torso,
+    right_upper_arm,
+    right_lower_arm,
+    right_upper_leg,
+      
+    left_upper_arm,
+    left_lower_arm,
+    left_upper_leg,
 
-    lastKeyDown = null;
-    finishAnimation = 2;
+    // rotation points
+    upperRightArmRotPt: createUpperArmRotationPoint(right_upper_arm),
+    lowerRightArmRotPt: createLowerArmRotationPoint(right_lower_arm),
+    rightUpperLegRotPt: createUpperLegRotationPoint(right_upper_leg),
 
-    return 0;
+    upperLeftArmRotPt: createUpperArmRotationPoint(left_upper_arm, 'left'),
+    lowerLeftArmRotPt: createLowerArmRotationPoint(left_lower_arm),
+    leftUpperLegRotPt: createUpperLegRotationPoint(left_upper_leg),
+    
+    // axis
+    rightArmAxis,
+    rightLegAxis,
+    leftArmAxis,
+    leftLegAxis,
+  };
+  
+  switch(stage) {
+    case 1: {
+      if (rotateUntil((i * upperDegreeRate), 'greater', 144)){
+        stage = 2;
+        return i = 0
+      }
+  
+      jumpingUp(jackRobot, true);
+      jacksUp(jackRobot, true);
+  
+      return i++;
+    }
+    case 2: {
+      if (rotateUntil((i * upperDegreeRate), 'greater', 144)){
+        resetRobotPosition();
+        stage = 1;
+  
+        if(animationKeyDown !== '2'){
+          lastKeyDown = null;
+          finishAnimation = 2;
+        }
+
+        return i = 0
+      }
+  
+      jumpingUp(jackRobot, false)
+      jacksUp(jackRobot, false);
+  
+      return i++;  
+    }
   }
 
-  return i + 1;
 }
