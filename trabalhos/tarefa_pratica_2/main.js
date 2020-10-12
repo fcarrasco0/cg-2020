@@ -160,6 +160,7 @@ function animate() {
   // reset animation instantly pushing r key
   if(animationKeyDown === 'r'){
     i = 0;
+    stage = 1;
     lastKeyDown = null;
     finishAnimation = 1;
 
