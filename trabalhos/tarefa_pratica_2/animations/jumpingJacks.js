@@ -42,9 +42,8 @@ function jacksUp (robot, up = true) {
   if(rotateUntil((i * robot.legDegreeRate), 'lesser', 60)){
     rightLeg.rotateAroundPoint(rightUpperLegRotPt, (clockRot * legRate), rightLegAxis);
     leftLeg.rotateAroundPoint(leftUpperLegRotPt, (clockRot * legRate), leftLegAxis);
-  }
-  
-}
+  }  
+};
 
 function jumpingUp(robot, up = true) {
   var move = up? new THREE.Vector3(0, 0.1, 0) : new THREE.Vector3(0,-0.1, 0);
@@ -55,12 +54,11 @@ function jumpingUp(robot, up = true) {
 var i = 0
 var stage = 1 // 1 - first rotation | 2 - second rotation | 3 - etc.
 
-// jumping jacks animation
 function polichinelo () {
   lastKeyDown = '2';
 
   // starts rotation radian rates
-  var upperArmRate = 0.15;
+  var upperArmRate = 0.1;
   var lowerArmRate = upperArmRate/2;
   var legRate = upperArmRate/2.5;
 
@@ -117,7 +115,7 @@ function polichinelo () {
   };
   
   switch(stage) {
-    case 1: {
+    case 1: { // jump and rotate arms up
       if (rotateUntil((i * upperDegreeRate), 'greater', 144)){
         stage = 2;
         return i = 0
@@ -128,7 +126,7 @@ function polichinelo () {
   
       return i++;
     }
-    case 2: {
+    case 2: { // jump and rotate arms down
       if (rotateUntil((i * upperDegreeRate), 'greater', 144)){
         resetRobotPosition();
         stage = 1;
@@ -148,4 +146,4 @@ function polichinelo () {
     }
   }
 
-}
+};
