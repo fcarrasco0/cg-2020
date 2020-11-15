@@ -49,8 +49,6 @@
 
     const { center } = primitive;
     const vertices = parametrica(primitive, pontos);
-    console.log('vertices parametricas 1 =', vertices[0][0], vertices[0][1]);
-    console.log('vertices parametricas 2 =', vertices[1][0], vertices[1][1]);
   
     for(let i = 0; i < vertices.length-1; i++){
       var baseStartX, baseEndX;
