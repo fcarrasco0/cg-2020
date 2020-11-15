@@ -254,7 +254,7 @@
           primitive.center = primitive.center.selection.data;
 
           // usando o tamanho do raio para quantidade de pontos na triangularização do circulo
-          const triangles = circleToTriangles(primitive, primitive.radius);//primitive.radius);
+          const triangles = circleToTriangles(primitive, 20);
           newScene.push(...triangles);
         } else {
           newScene.push(scene[i]);
