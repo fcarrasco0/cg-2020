@@ -253,7 +253,7 @@
         if(primitive.shape === 'circle'){
           primitive.center = primitive.center.selection.data;
 
-          // usando o tamanho do raio para quantidade de pontos na triangularização do circulo
+          // usando o 20 pontos na triangularização do circulo para o efeito de AA ficar mais aparente
           const triangles = circleToTriangles(primitive, 20);
           newScene.push(...triangles);
         } else {
