@@ -217,6 +217,8 @@
       if (colorWeight != 1) {
         var colorAverage = 240;
         
+        // On RGB the lesser the value the more dark the color will be
+        // to fix this, the operation (1 - colorWeight) is made
         originalColor[0] += (originalColor[0] || colorAverage) * (1 - colorWeight);
         originalColor[1] += (originalColor[1] || colorAverage) * (1 - colorWeight);
         originalColor[2] += (originalColor[2] || colorAverage) * (1 - colorWeight);
@@ -279,6 +281,7 @@
 
     rasterize: function() {
       console.log('INICIO DA RASTERIZAÇÃO', new Date().toISOString())
+      var circleBordersOnly = true;
       var activedAntiAliasing = true;
 
       // In this loop, the image attribute must be updated after the rasterization procedure.
@@ -300,8 +303,11 @@
               color.T.selection.data[2] = primitive.initialColor[2];
               
               this.set_pixel( i, this.height - (j + 1), color );
+              
+              // if anti-aliasing is set true
             } else if(activedAntiAliasing === true) {
-              if(primitive.originalShape){
+              // if the original shape was a circle and apply AA only on circle borders is set true
+              if(circleBordersOnly === true && primitive.originalShape){
                 if( (x > primitive.baseStartX && x < primitive.baseEndX) && (y > primitive.baseStartY && y < primitive.baseEndY)) {
                   var color = antiAliasing(x, y, i, j, primitive, this);
                   if(color) this.set_pixel( i, this.height - (j + 1), color );
