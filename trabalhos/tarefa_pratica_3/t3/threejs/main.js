@@ -131,11 +131,12 @@ function animate() {
   var center = setVector(0,0,0);
   var axis = { x:0, y:-1, z:0};
 
-  var earthYearRate = 0.004;
-  var earthAxisRotatioRate = -0.015;
+  var earthYearRate = 0.005;
+  var earthAxisRotatioRate = earthYearRate * 6.67;
   
+  // adding earthAxisRotationRate to nullify its influence on moon rotation
   // makes the moon rotate approximately 12 times around earth on 1 earth cicle around the sun
-  var moonCicleRate = (earthYearRate * 8.5);
+  var moonCicleRate = (earthYearRate * 12) + earthAxisRotatioRate;
   var moonAxisRotationRate = -moonCicleRate;
 
   earth.rotateAroundPoint(center , earthYearRate, axis, earthAxisRotatioRate);
