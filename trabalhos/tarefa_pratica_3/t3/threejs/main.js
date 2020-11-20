@@ -24,6 +24,7 @@ THREE.Object3D.prototype.rotateAroundPoint = function (point, theta, axis, rotat
     this.parent.worldToLocal(this.position); // undo world coordinates compensation
   }
   
+  // changed to simulate rotation around self axis.
   this.rotation.y += rotationRate
   
   return this;
@@ -61,7 +62,7 @@ function init() {
   // Setting up camera
   camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.5, 1000 );
   camera.position.z = 3;
-  camera.position.y = 20;
+  camera.position.y = 35;
   camera.lookAt( 0, 0, -4);
     
   // Setting up scene
@@ -69,25 +70,20 @@ function init() {
   system = new THREE.Group();
     
   // Earth
-  earth = createSphere(1, 20, 'texture/earth.jpg');
+  earth = createSphere(1, 20, 'texture/earth.jpg', 'Phong');
   earth.position.z = -10;
 
   // Moon
-  moon = createSphere(0.25, 20, 'texture/moon.jpg');
+  moon = createSphere(0.5, 20, 'texture/moon.jpg', 'Phong');
   moon.position.z = -3;
 
   // Sun (Sphere + Light)
-  sun = createSphere(3, 20, 'texture/sun.jpg');
+  sun = createSphere(2.25, 20, 'texture/sun.jpg');
   sun.position.z = -3;
   
-  const light = new THREE.PointLight(0xffffff, 5.25);
-  light.position.set(0, 0, 0);
-  sun.add(light);
-  console.log(light);
-  /* Complete: add light
-  sunlight...;
-  sun...
-  */
+  sunlight = new THREE.PointLight(0xffffff, 1.5);
+  sunlight.position.set(0, 0, 0);
+  sun.add(sunlight);
 
   earth.add(moon);
   sun.add(earth);
@@ -129,12 +125,21 @@ function animate() {
 	// required if controls.enableDamping or controls.autoRotate are set to true
 	controls.update();
 
-  
   stats.update();
   renderer.render( scene, camera );
   
-  earth.rotateAroundPoint(setVector(0,0,0), 0.005, { x:0, y:-1, z:0}, -0.015)
-  moon.rotateAroundPoint(setVector(0,0,0), 0.02, { x:0, y:-1, z:0}, 0.02)
+  var center = setVector(0,0,0);
+  var axis = { x:0, y:-1, z:0};
+
+  var earthYearRate = 0.004;
+  var earthAxisRotatioRate = -0.015;
+  
+  // makes the moon rotate approximately 12 times around earth on 1 earth cicle around the sun
+  var moonCicleRate = (earthYearRate * 8.5);
+  var moonAxisRotationRate = -moonCicleRate;
+
+  earth.rotateAroundPoint(center , earthYearRate, axis, earthAxisRotatioRate);
+  moon.rotateAroundPoint(center, moonCicleRate, axis, moonAxisRotationRate);
 }
 
 init();
