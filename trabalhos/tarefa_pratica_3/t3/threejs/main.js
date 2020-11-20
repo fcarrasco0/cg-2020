@@ -131,8 +131,9 @@ function animate() {
   var center = setVector(0,0,0);
   var axis = { x:0, y:-1, z:0};
 
+  // the radian rate to complete 1 full cicle around the sun
   var earthYearRate = 0.005;
-  var earthAxisRotatioRate = earthYearRate * 6.67;
+  var earthAxisRotatioRate = earthYearRate * 6.67; // making 360º to 24h rotation simulation
   
   // adding earthAxisRotationRate to nullify its influence on moon rotation
   // makes the moon rotate approximately 12 times around earth on 1 earth cicle around the sun
